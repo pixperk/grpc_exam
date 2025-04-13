@@ -8,7 +8,7 @@ service ExamService {
   rpc GetExamResult(GetExamResultRequest) returns (GetExamResultResponse); //unary
   rpc StreamExamResults(StreamExamResultsRequest) returns (stream GetExamResultResponse); //server streaming
   rpc SubmitExamResults(stream SubmitExamResultRequest) returns (SubmitExamResultResponse); //client streaming
-
+  rpc LiveExamQuery(stream GetExamResultRequest) returns (stream GetExamResultResponse); //bidi streaming
 }
 
 message GetExamResultRequest {

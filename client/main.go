@@ -22,6 +22,7 @@ func main() {
 
 	//clients.Unary(client)
 	//clients.Server_stream(client)
-	clients.Client_stream(client)
+	//clients.Client_stream(client)
+	clients.BiDirectional(client)
 
 }

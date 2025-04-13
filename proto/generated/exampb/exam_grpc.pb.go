@@ -22,6 +22,7 @@ const (
 	ExamService_GetExamResult_FullMethodName     = "/exam.ExamService/GetExamResult"
 	ExamService_StreamExamResults_FullMethodName = "/exam.ExamService/StreamExamResults"
 	ExamService_SubmitExamResults_FullMethodName = "/exam.ExamService/SubmitExamResults"
+	ExamService_LiveExamQuery_FullMethodName     = "/exam.ExamService/LiveExamQuery"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -31,6 +32,7 @@ type ExamServiceClient interface {
 	GetExamResult(ctx context.Context, in *GetExamResultRequest, opts ...grpc.CallOption) (*GetExamResultResponse, error)
 	StreamExamResults(ctx context.Context, in *StreamExamResultsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetExamResultResponse], error)
 	SubmitExamResults(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SubmitExamResultRequest, SubmitExamResultResponse], error)
+	LiveExamQuery(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[GetExamResultRequest, GetExamResultResponse], error)
 }
 
 type examServiceClient struct {
@@ -83,6 +85,19 @@ func (c *examServiceClient) SubmitExamResults(ctx context.Context, opts ...grpc.
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ExamService_SubmitExamResultsClient = grpc.ClientStreamingClient[SubmitExamResultRequest, SubmitExamResultResponse]
 
+func (c *examServiceClient) LiveExamQuery(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[GetExamResultRequest, GetExamResultResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ExamService_ServiceDesc.Streams[2], ExamService_LiveExamQuery_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetExamResultRequest, GetExamResultResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ExamService_LiveExamQueryClient = grpc.BidiStreamingClient[GetExamResultRequest, GetExamResultResponse]
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -90,6 +105,7 @@ type ExamServiceServer interface {
 	GetExamResult(context.Context, *GetExamResultRequest) (*GetExamResultResponse, error)
 	StreamExamResults(*StreamExamResultsRequest, grpc.ServerStreamingServer[GetExamResultResponse]) error
 	SubmitExamResults(grpc.ClientStreamingServer[SubmitExamResultRequest, SubmitExamResultResponse]) error
+	LiveExamQuery(grpc.BidiStreamingServer[GetExamResultRequest, GetExamResultResponse]) error
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -108,6 +124,9 @@ func (UnimplementedExamServiceServer) StreamExamResults(*StreamExamResultsReques
 }
 func (UnimplementedExamServiceServer) SubmitExamResults(grpc.ClientStreamingServer[SubmitExamResultRequest, SubmitExamResultResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method SubmitExamResults not implemented")
+}
+func (UnimplementedExamServiceServer) LiveExamQuery(grpc.BidiStreamingServer[GetExamResultRequest, GetExamResultResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method LiveExamQuery not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -166,6 +185,13 @@ func _ExamService_SubmitExamResults_Handler(srv interface{}, stream grpc.ServerS
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ExamService_SubmitExamResultsServer = grpc.ClientStreamingServer[SubmitExamResultRequest, SubmitExamResultResponse]
 
+func _ExamService_LiveExamQuery_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ExamServiceServer).LiveExamQuery(&grpc.GenericServerStream[GetExamResultRequest, GetExamResultResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ExamService_LiveExamQueryServer = grpc.BidiStreamingServer[GetExamResultRequest, GetExamResultResponse]
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -187,6 +213,12 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SubmitExamResults",
 			Handler:       _ExamService_SubmitExamResults_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "LiveExamQuery",
+			Handler:       _ExamService_LiveExamQuery_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},
