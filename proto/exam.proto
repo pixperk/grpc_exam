@@ -6,12 +6,20 @@ option go_package = "generated/exampb";
 
 service ExamService {
   rpc GetExamResult(GetExamResultRequest) returns (GetExamResultResponse);
+  rpc StreamExamResults(StreamExamResultsRequest) returns (stream GetExamResultResponse);
+
 }
 
 message GetExamResultRequest {
   string student_id = 1;
   string exam_id = 2;
 }
+
+message StreamExamResultsRequest {
+  string student_id = 1;
+  repeated string exam_ids = 2;
+}
+
 
 message GetExamResultResponse {
   string student_name = 1;

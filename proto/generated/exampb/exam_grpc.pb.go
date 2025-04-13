@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ExamService_GetExamResult_FullMethodName = "/exam.ExamService/GetExamResult"
+	ExamService_GetExamResult_FullMethodName     = "/exam.ExamService/GetExamResult"
+	ExamService_StreamExamResults_FullMethodName = "/exam.ExamService/StreamExamResults"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExamServiceClient interface {
 	GetExamResult(ctx context.Context, in *GetExamResultRequest, opts ...grpc.CallOption) (*GetExamResultResponse, error)
+	StreamExamResults(ctx context.Context, in *StreamExamResultsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetExamResultResponse], error)
 }
 
 type examServiceClient struct {
@@ -47,11 +49,31 @@ func (c *examServiceClient) GetExamResult(ctx context.Context, in *GetExamResult
 	return out, nil
 }
 
+func (c *examServiceClient) StreamExamResults(ctx context.Context, in *StreamExamResultsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetExamResultResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ExamService_ServiceDesc.Streams[0], ExamService_StreamExamResults_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamExamResultsRequest, GetExamResultResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ExamService_StreamExamResultsClient = grpc.ServerStreamingClient[GetExamResultResponse]
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
 type ExamServiceServer interface {
 	GetExamResult(context.Context, *GetExamResultRequest) (*GetExamResultResponse, error)
+	StreamExamResults(*StreamExamResultsRequest, grpc.ServerStreamingServer[GetExamResultResponse]) error
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -64,6 +86,9 @@ type UnimplementedExamServiceServer struct{}
 
 func (UnimplementedExamServiceServer) GetExamResult(context.Context, *GetExamResultRequest) (*GetExamResultResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetExamResult not implemented")
+}
+func (UnimplementedExamServiceServer) StreamExamResults(*StreamExamResultsRequest, grpc.ServerStreamingServer[GetExamResultResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamExamResults not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +129,17 @@ func _ExamService_GetExamResult_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_StreamExamResults_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamExamResultsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ExamServiceServer).StreamExamResults(m, &grpc.GenericServerStream[StreamExamResultsRequest, GetExamResultResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ExamService_StreamExamResultsServer = grpc.ServerStreamingServer[GetExamResultResponse]
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +152,12 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ExamService_GetExamResult_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamExamResults",
+			Handler:       _ExamService_StreamExamResults_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "exam.proto",
 }
