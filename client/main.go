@@ -21,6 +21,7 @@ func main() {
 	client := exampb.NewExamServiceClient(conn)
 
 	//clients.Unary(client)
-	clients.Server_stream(client)
+	//clients.Server_stream(client)
+	clients.Client_stream(client)
 
 }
