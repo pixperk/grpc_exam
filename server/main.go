@@ -27,6 +27,5 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		slog.Error("failed to serve", "error", err)
 	}
-	slog.Info("server started successfully")
 
 }
