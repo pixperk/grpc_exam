@@ -1,7 +1,7 @@
 proto:
 	protoc \
 		--proto_path=proto \
-		--go_out=generated \
-		--go-grpc_out=generated \
+		--go_out=proto \
+		--go-grpc_out=proto \
 		proto/*.proto
-	@echo "Proto files generated in the 'generated' directory."
+	@echo "Proto files generated in the 'proto' directory."
