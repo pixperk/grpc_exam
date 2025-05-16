@@ -36,12 +36,17 @@ Cleanly structured for scalability and learning.
 │       ├── client_stream.go
 │       ├── bi_stream.go
 │       └── exam_service_server.go
+├── unit_test/
+│   └── server/
+│       ├── unary_test.go
+│       ├── server_stream_test.go
+│       ├── client_stream_test.go
+│       └── bi_stream_test.go
 ├── utils/
 │   └── logger.go
 ├── go.mod
 ├── go.sum
 └── Makefile
-```
 
 ---
 
@@ -84,11 +89,26 @@ go run client/main.go bi
 ```
 
 ---
+## 🧪 Testing
 
+This project includes comprehensive tests covering all RPC types (Unary, Server Streaming, Client Streaming, and Bidirectional Streaming) using:
+
+- **Testify** for assertions  
+- **GoMock** for mocking interfaces  
+
+To run the tests, use:
+
+```bash
+go test ./unit_test/server -v
+```
+
+---
 ## 🔧 Tools Used
-- gRPC & Protocol Buffers
-- Go Modules
-- slog (structured logging)
+- **gRPC & Protocol Buffers** – for defining and implementing the 4 types of RPCs
+- **Go Modules** – for dependency management
+- **slog** – structured logging for better debugging and traceability
+- **Go Test** – for unit testing server-side logic
+- **Makefile** – to simplify running proto generation, server, and client commands
 
 ---
 
