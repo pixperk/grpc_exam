@@ -47,6 +47,7 @@ Cleanly structured for scalability and learning.
 ├── go.mod
 ├── go.sum
 └── Makefile
+```
 
 ---
 
